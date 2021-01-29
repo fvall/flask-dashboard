@@ -1,3 +1,29 @@
-p {
-    color: tomato;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --color-1: #00153D;
+    --color-2: #E0EBFF;
+    --color-3: #182C52;
+    --background-color: var(--color-1);
+    --text-color: var(--color-2);
+}
+
+body {
+    background-color: var(--background-color);
+}
+
+p, h1, h2 {
+    color: var(--text-color);
+}
+
+table {
+    border-collapse: collapse;
+}
+
+td {
+    color: var(--text-color);
 }

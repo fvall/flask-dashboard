@@ -1,5 +1,5 @@
 from flask import Flask
-
+from . import util
 
 def create_app():
 
@@ -7,5 +7,5 @@ def create_app():
 
     with app.app_context():
         
-        from app import index
+        from . import index
         return app
