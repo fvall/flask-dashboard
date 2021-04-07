@@ -1,8 +1,14 @@
+import datetime
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from flask import current_app, render_template
-from .data import fake_data, format_data_frame
+from .data import (
+    calc_return,
+    format_data_frame,
+    get_price_data
+)
+
 from .util import css_variables
 from io import BytesIO
 
@@ -20,6 +26,7 @@ def plot(prices):
         .fillna(0.0)
         .cumsum()
         .apply(np.exp)
+        .apply(lambda x: x - 1)
     )
 
     return prices.plot()
@@ -49,8 +56,17 @@ def customize_chart(chart):
 @app.route("/")
 def home():
 
-    df = fake_data()
-    _plot = plot(fake_data())
+    symbols = ['SPY', 'EZU', 'IWM', 'EWJ']
+    end = datetime.date.today()
+    start = end - datetime.timedelta(days = 30 * 3)
+
+    df = get_price_data(symbols, start_date = start, end_date = end)
+    _plot = (
+        df
+        .loc[:, ['date', 'symbol', 'adj_close']]
+        .pivot('date', 'symbol', 'adj_close')
+        .pipe(plot)
+    )
     _plot = customize_chart(_plot)
     
     try:
@@ -58,8 +74,21 @@ def home():
     finally:
         plt.close()
 
+    ret_d01 = calc_return(df, index = 1)
+    ret_d21 = calc_return(df, index = 21)
+    prices  = (
+        df[['symbol', 'date', 'adj_close']]
+        .rename(
+            columns = {'adj_close' : 'price'}
+        )
+        .merge(ret_d01.reset_index(), how = 'inner', on = ['date', 'symbol'])
+        .rename(columns = {'ret' : 'daily_return'})
+        .merge(ret_d21.reset_index(), how = 'inner', on = ['date', 'symbol'])
+        .rename(columns = {'ret' : 'monthly_return'})
+    )
+
     return render_template(
         "index.html",
-        prices = format_data_frame(df).render(),
+        prices = format_data_frame(prices).render(),
         chart = chart.getvalue().decode('utf8')
     )
