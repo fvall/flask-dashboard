@@ -10,6 +10,7 @@ python = "^3.9"
 Flask = "^1.1.2"
 pandas = "^1.2.1"
 matplotlib = "^3.3.3"
+yfinance = "^0.1.59"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.8.4"
