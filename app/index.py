@@ -56,7 +56,7 @@ def customize_chart(chart):
 @app.route("/")
 def home():
 
-    symbols = ['SPY', 'EZU', 'IWM', 'EWJ']
+    symbols = ['SPY', 'EZU', 'IWM', 'EWJ', 'EEM']
     end = datetime.date.today()
     start = end - datetime.timedelta(days = 30 * 3)
 
@@ -87,8 +87,25 @@ def home():
         .rename(columns = {'ret' : 'monthly_return'})
     )
 
+    # - styling
+
+    return_cols = ['daily_return', 'monthly_return']
+    def ret_color(x):
+        color = 'tomato' if x < 0 else 'lightgreen'
+        return 'color: %s' % color
+
+    prices = (
+        prices
+        .sort_values('monthly_return', ascending = False)
+        .assign(date = lambda df: df['date'].dt.strftime("%Y-%m-%d"))
+        .pipe(format_data_frame)
+        .format("{:,.2f}", subset = ['price'])
+        .applymap(ret_color, subset = return_cols)
+        .format("{:+,.2%}", subset = return_cols)
+    )
+
     return render_template(
         "index.html",
-        prices = format_data_frame(prices).render(),
+        prices = prices.render(),
         chart = chart.getvalue().decode('utf8')
     )
