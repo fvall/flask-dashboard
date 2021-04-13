@@ -2,6 +2,7 @@ import datetime
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 from flask import current_app, render_template
 from .data import (
     calc_return,
@@ -50,6 +51,7 @@ def customize_chart(chart):
     for s in chart.spines:
         chart.spines[s].set_color(css['color_2'])
 
+    chart.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
     return chart
 
 
